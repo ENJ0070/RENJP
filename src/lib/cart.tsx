@@ -1,12 +1,15 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { safeStorage, type Product } from "@/lib/store";
 import { convertLink } from "@/lib/linkConverter";
+import { productWeightKg, roundHalfKg } from "@/lib/weight";
 
 export type CartItem = {
   id: string;
   title: string;
   image: string | null;
   price: number;
+  /** Szacowana waga produktu w kg (zaokrąglona do 0,5 kg). */
+  weight_kg?: number;
   /** Domyślny link do produktu (sklep / agent / QC). */
   url: string;
   /** Linki agentów (nazwa agenta -> link) — do wyboru agenta w koszyku. */
