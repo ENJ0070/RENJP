@@ -1869,8 +1869,10 @@ function SellersTab() {
     const withPass = form.password
       ? { ...base, password_hash: await sha256Hex(form.password) }
       : base;
+    // Upsert po id: konta wbudowane w kod nie mają jeszcze wiersza w bazie,
+    // więc zwykły update nic by nie zmienił i zapis wyglądałby na udany.
     const { error } = form.id
-      ? await panelDb.from("sellers").update(withPass).eq("id", form.id)
+      ? await panelDb.from("sellers").upsert({ ...withPass, id: form.id })
       : await panelDb.from("sellers").insert(withPass);
     setMsg(error ? "Nie udało się zapisać sprzedawcy." : "Zapisano.");
     if (!error) setForm(empty);

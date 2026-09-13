@@ -300,7 +300,8 @@ function CartPage() {
             </button>
 
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              {t("cart.estimateNote", "Koszt orientacyjny dla 1 kg. Wagi produktów dodamy wkrótce.")}
+              Koszt orientacyjny dla {formatKg(estimateWeightKg || 1)} — wagi są szacowane i zostaną
+              doprecyzowane.
             </p>
           </section>
         )}
