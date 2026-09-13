@@ -1,12 +1,15 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { safeStorage, type Product } from "@/lib/store";
 import { convertLink } from "@/lib/linkConverter";
+import { productWeightKg, roundHalfKg } from "@/lib/weight";
 
 export type CartItem = {
   id: string;
   title: string;
   image: string | null;
   price: number;
+  /** Szacowana waga produktu w kg (zaokrąglona do 0,5 kg). */
+  weight_kg?: number;
   /** Domyślny link do produktu (sklep / agent / QC). */
   url: string;
   /** Linki agentów (nazwa agenta -> link) — do wyboru agenta w koszyku. */
@@ -82,6 +85,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         title: p.title,
         image: p.image_url,
         price: Number(p.price),
+        weight_kg: productWeightKg(p),
         url: productLink(p),
         agent_links: p.agent_links ?? {},
         store_url: p.store_url ?? "",
@@ -103,4 +107,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   return useContext(CartContext);
+}
+
+/** Łączna waga paczki (suma wag produktów), zaokrąglona w górę do 0,5 kg. */
+export function cartWeightKg(items: CartItem[]): number {
+  if (!items.length) return 0;
+  const sum = items.reduce((s, i) => s + (Number(i.weight_kg) || productWeightKg(i)), 0);
+  return roundHalfKg(sum);
 }

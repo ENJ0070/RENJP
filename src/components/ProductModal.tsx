@@ -9,6 +9,7 @@ import { useLang } from "@/lib/i18n";
 import { useServerFn } from "@tanstack/react-start";
 
 import { QcPhotos } from "@/components/QcPhotos";
+import { formatKg, productWeightKg } from "@/lib/weight";
 import { finderQcByProduct } from "@/lib/finderqc.functions";
 
 /** Interactive shopping modal: pick colorway + size, then buy through an agent. */
@@ -107,6 +108,11 @@ export function ProductModal({
             <PriceTags pln={Number(product.price)} size="lg" />
             <QualityBadges quality={product.quality} batch={product.batch} />
 
+            <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-deep px-3 py-1.5 text-xs font-bold text-muted-foreground">
+              <span>⚖️</span>
+              Waga (szacowana): <span className="text-primary">{formatKg(productWeightKg(product))}</span>
+            </div>
+
             {product.sizes?.length ? (
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
@@ -164,11 +170,10 @@ export function ProductModal({
               </p>
               <QcPhotos
                 loadPage={loadQcPage}
-                initialImages={storedQc}
+                initialImages={storedQc.slice(0, 6)}
                 autoLoad={storedQc.length === 0}
                 cols="grid-cols-3"
-                buttonText="Pokaż więcej zdjęć QC"
-                startText="Pokaż więcej zdjęć QC"
+                showMore={false}
                 emptyText="Brak zdjęć QC dla tego produktu."
               />
               <Link
@@ -176,7 +181,7 @@ export function ProductModal({
                 search={{ product: product.id }}
                 className="mt-2 block rounded-lg border border-border px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-muted-foreground hover:border-primary hover:text-primary"
               >
-                Otwórz stronę QC →
+                Otwórz stronę z resztą QC →
               </Link>
             </div>
 

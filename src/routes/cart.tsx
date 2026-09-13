@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCart, cartItemLink } from "@/lib/cart";
+import { useCart, cartItemLink, cartWeightKg } from "@/lib/cart";
+import { formatKg } from "@/lib/weight";
 import { useCurrency, formatPrice } from "@/lib/currency";
 import { useLang } from "@/lib/i18n";
 import { LOCAL_SHIPPING_RATES } from "@/data/localShipping";
@@ -50,13 +51,14 @@ function CartPage() {
 
   const selectedRate = shippingLines.find((r) => r.id === selectedLine);
 
-  // Bez wag używamy orientacyjnego kosztu dla 1 kg z tabeli cenowej.
-  const estimateWeightKg = 1;
+  // Waga paczki: suma szacowanych wag produktów, zaokrąglona do 0,5 kg.
+  const estimateWeightKg = cartWeightKg(items);
   const priceFor1kg = (rate: (typeof LOCAL_SHIPPING_RATES)[number]) => {
+    const kg = estimateWeightKg || 1;
     const table = rate.price_table ?? {};
-    const key = String(estimateWeightKg);
+    const key = String(kg);
     const val = table[key as keyof typeof table];
-    return typeof val === "number" ? val : rate.base_price + rate.price_per_kg * estimateWeightKg;
+    return typeof val === "number" ? val : rate.base_price + rate.price_per_kg * kg;
   };
   const estimateShipping = selectedRate ? priceFor1kg(selectedRate) : null;
 
@@ -188,9 +190,15 @@ function CartPage() {
           )}
 
           {items.length > 0 && (
-            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-              <span className="text-sm text-muted-foreground">{t("cart.total", "Łącznie")}</span>
-              <span className="font-display text-xl font-bold text-primary">{formatPrice(total, currency)}</span>
+            <div className="mt-4 space-y-2 border-t border-border pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Szacowana waga paczki</span>
+                <span className="text-sm font-bold text-foreground">⚖️ {formatKg(estimateWeightKg)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t("cart.total", "Łącznie")}</span>
+                <span className="font-display text-xl font-bold text-primary">{formatPrice(total, currency)}</span>
+              </div>
             </div>
           )}
         </section>
@@ -292,7 +300,8 @@ function CartPage() {
             </button>
 
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              {t("cart.estimateNote", "Koszt orientacyjny dla 1 kg. Wagi produktów dodamy wkrótce.")}
+              Koszt orientacyjny dla {formatKg(estimateWeightKg || 1)} — wagi są szacowane i zostaną
+              doprecyzowane.
             </p>
           </section>
         )}
