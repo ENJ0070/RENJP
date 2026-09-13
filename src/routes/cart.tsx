@@ -50,13 +50,14 @@ function CartPage() {
 
   const selectedRate = shippingLines.find((r) => r.id === selectedLine);
 
-  // Bez wag używamy orientacyjnego kosztu dla 1 kg z tabeli cenowej.
-  const estimateWeightKg = 1;
+  // Waga paczki: suma szacowanych wag produktów, zaokrąglona do 0,5 kg.
+  const estimateWeightKg = cartWeightKg(items);
   const priceFor1kg = (rate: (typeof LOCAL_SHIPPING_RATES)[number]) => {
+    const kg = estimateWeightKg || 1;
     const table = rate.price_table ?? {};
-    const key = String(estimateWeightKg);
+    const key = String(kg);
     const val = table[key as keyof typeof table];
-    return typeof val === "number" ? val : rate.base_price + rate.price_per_kg * estimateWeightKg;
+    return typeof val === "number" ? val : rate.base_price + rate.price_per_kg * kg;
   };
   const estimateShipping = selectedRate ? priceFor1kg(selectedRate) : null;
 
