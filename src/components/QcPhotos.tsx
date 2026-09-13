@@ -20,6 +20,7 @@ export function QcPhotos({
   autoLoad = false,
   initialImages,
   cols,
+  showMore = true,
   emptyText = "Nie znaleziono zdjęć QC.",
   buttonText = "Pokaż więcej",
   startText = "Pokaż zdjęcia QC",
@@ -29,6 +30,8 @@ export function QcPhotos({
   /** Zdjęcia znane od razu (np. zapisane przy produkcie) — widoczne bez klikania. */
   initialImages?: string[];
   cols?: string;
+  /** Pokazuj przycisk dociągania kolejnych zdjęć. */
+  showMore?: boolean;
   emptyText?: string;
   buttonText?: string;
   startText?: string;
