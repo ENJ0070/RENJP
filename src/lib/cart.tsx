@@ -85,6 +85,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         title: p.title,
         image: p.image_url,
         price: Number(p.price),
+        weight_kg: productWeightKg(p),
         url: productLink(p),
         agent_links: p.agent_links ?? {},
         store_url: p.store_url ?? "",
