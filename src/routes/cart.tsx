@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCart, cartItemLink } from "@/lib/cart";
+import { useCart, cartItemLink, cartWeightKg } from "@/lib/cart";
+import { formatKg } from "@/lib/weight";
 import { useCurrency, formatPrice } from "@/lib/currency";
 import { useLang } from "@/lib/i18n";
 import { LOCAL_SHIPPING_RATES } from "@/data/localShipping";
@@ -189,9 +190,15 @@ function CartPage() {
           )}
 
           {items.length > 0 && (
-            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-              <span className="text-sm text-muted-foreground">{t("cart.total", "Łącznie")}</span>
-              <span className="font-display text-xl font-bold text-primary">{formatPrice(total, currency)}</span>
+            <div className="mt-4 space-y-2 border-t border-border pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Szacowana waga paczki</span>
+                <span className="text-sm font-bold text-foreground">⚖️ {formatKg(estimateWeightKg)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{t("cart.total", "Łącznie")}</span>
+                <span className="font-display text-xl font-bold text-primary">{formatPrice(total, currency)}</span>
+              </div>
             </div>
           )}
         </section>
