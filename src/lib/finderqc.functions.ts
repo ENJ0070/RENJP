@@ -70,16 +70,31 @@ export const finderQcByProduct = createServerFn({ method: "POST" })
     if (!row) return empty;
 
     const src = productSourceUrl(row as any);
-    if (src) {
-      const res = await fetchFinderQcByUrl(src, data.page, data.pageSize);
-      if (res.ok && res.images.length) {
-        return { ...res, title: (row as any).title || res.title };
+    const title = ((row as any).title as string) ?? "";
+
+    // Strona 1: najpierw zapisane zdjęcia (natychmiast), potem szybki magazyn USFans.
+    if (data.page === 1) {
+      const cached = (((row as any).qc_images ?? []) as string[]).filter((u) =>
+        /^https?:\/\//i.test(u),
+      );
+      if (cached.length) {
+        return {
+          ok: true as const,
+          title,
+          images: cached,
+          totalPhotos: cached.length,
+          hasMore: true,
+          source: "",
+        };
       }
     }
 
-    if (data.page > 1) return { ...empty, title: (row as any).title ?? "" };
+    if (data.page > 1) {
+      const finderPage = data.page - 1;
+      const res = src ? await fetchFinderQcByUrl(src, finderPage, data.pageSize) : empty;
+      return { ...res, title: title || res.title };
+    }
 
-    // Zapas 1: magazyn USFans (ma QC dla prawie każdego produktu).
     if (src) {
       const { fetchAgentDetails } = await import("@/lib/agentApi");
       const details = await fetchAgentDetails(src).catch(() => null);
