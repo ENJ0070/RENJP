@@ -164,11 +164,10 @@ export function ProductModal({
               </p>
               <QcPhotos
                 loadPage={loadQcPage}
-                initialImages={storedQc}
+                initialImages={storedQc.slice(0, 6)}
                 autoLoad={storedQc.length === 0}
                 cols="grid-cols-3"
-                buttonText="Pokaż więcej zdjęć QC"
-                startText="Pokaż więcej zdjęć QC"
+                showMore={false}
                 emptyText="Brak zdjęć QC dla tego produktu."
               />
               <Link
@@ -176,7 +175,7 @@ export function ProductModal({
                 search={{ product: product.id }}
                 className="mt-2 block rounded-lg border border-border px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-muted-foreground hover:border-primary hover:text-primary"
               >
-                Otwórz stronę QC →
+                Otwórz stronę z resztą QC →
               </Link>
             </div>
 
