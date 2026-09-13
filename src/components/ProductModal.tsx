@@ -9,6 +9,7 @@ import { useLang } from "@/lib/i18n";
 import { useServerFn } from "@tanstack/react-start";
 
 import { QcPhotos } from "@/components/QcPhotos";
+import { formatKg, productWeightKg } from "@/lib/weight";
 import { finderQcByProduct } from "@/lib/finderqc.functions";
 
 /** Interactive shopping modal: pick colorway + size, then buy through an agent. */
@@ -106,6 +107,11 @@ export function ProductModal({
           <div className="space-y-4">
             <PriceTags pln={Number(product.price)} size="lg" />
             <QualityBadges quality={product.quality} batch={product.batch} />
+
+            <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-deep px-3 py-1.5 text-xs font-bold text-muted-foreground">
+              <span>⚖️</span>
+              Waga (szacowana): <span className="text-primary">{formatKg(productWeightKg(product))}</span>
+            </div>
 
             {product.sizes?.length ? (
               <div>
