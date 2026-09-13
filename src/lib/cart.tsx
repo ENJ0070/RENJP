@@ -108,3 +108,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 export function useCart() {
   return useContext(CartContext);
 }
+
+/** Łączna waga paczki (suma wag produktów), zaokrąglona w górę do 0,5 kg. */
+export function cartWeightKg(items: CartItem[]): number {
+  if (!items.length) return 0;
+  const sum = items.reduce((s, i) => s + (Number(i.weight_kg) || productWeightKg(i)), 0);
+  return roundHalfKg(sum);
+}
