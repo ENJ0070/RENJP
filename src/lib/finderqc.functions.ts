@@ -13,23 +13,26 @@ export const finderQcByLink = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const { fetchFinderQcByUrl } = await import("@/lib/finderqc.server");
-    const res = await fetchFinderQcByUrl(data.url, data.page, data.pageSize);
-    if (res.ok && res.images.length) return res;
-    if (data.page > 1) return res;
 
-    // Zapas: magazyn USFans — ma QC dla prawie każdego produktu.
-    const { fetchAgentDetails } = await import("@/lib/agentApi");
-    const details = await fetchAgentDetails(data.url).catch(() => null);
-    const images = (details?.qcImages ?? []).filter((u) => /^https?:\/\//i.test(u));
-    if (!images.length) return res;
-    return {
-      ok: true as const,
-      title: details?.title || res.title,
-      images,
-      totalPhotos: images.length,
-      hasMore: false,
-      source: "",
-    };
+    // Najpierw magazyn USFans — odpowiada od razu, więc wyszukiwarka nie zwalnia.
+    if (data.page === 1) {
+      const { fetchAgentDetails } = await import("@/lib/agentApi");
+      const details = await fetchAgentDetails(data.url).catch(() => null);
+      const images = (details?.qcImages ?? []).filter((u) => /^https?:\/\//i.test(u));
+      if (images.length) {
+        return {
+          ok: true as const,
+          title: details?.title ?? "",
+          images,
+          totalPhotos: images.length,
+          hasMore: true,
+          source: "",
+        };
+      }
+    }
+
+    // Zapas: katalog FinderQC (wolniejszy, chodzi przez pośrednika).
+    return await fetchFinderQcByUrl(data.url, data.page, data.pageSize);
   });
 
 
