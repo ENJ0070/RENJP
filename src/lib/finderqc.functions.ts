@@ -31,8 +31,9 @@ export const finderQcByLink = createServerFn({ method: "POST" })
       }
     }
 
-    // Zapas: katalog FinderQC (wolniejszy, chodzi przez pośrednika).
-    return await fetchFinderQcByUrl(data.url, data.page, data.pageSize);
+    // Dalsze strony: katalog FinderQC (wolniejszy, chodzi przez pośrednika).
+    const finderPage = data.page > 1 ? data.page - 1 : 1;
+    return await fetchFinderQcByUrl(data.url, finderPage, data.pageSize);
   });
 
 
