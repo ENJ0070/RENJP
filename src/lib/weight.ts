@@ -23,7 +23,7 @@ const RULES: Array<{ re: RegExp; kg: number }> = [
 
 /** Czy produkt to buty (mają pudełko). */
 export function isShoe(p: WeightInput): boolean {
-  return RULES[0].re.test(`${p.category ?? ""} ${p.title ?? ""}`);
+  return RULES[0]!.re.test(`${p.category ?? ""} ${p.title ?? ""}`);
 }
 
 /** Surowa szacowana waga produktu w kg. */
