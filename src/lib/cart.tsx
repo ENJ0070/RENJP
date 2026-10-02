@@ -6,6 +6,7 @@ import { productWeightKg, roundHalfKg } from "@/lib/weight";
 export type CartItem = {
   id: string;
   title: string;
+  category?: string;
   image: string | null;
   price: number;
   /** Szacowana waga produktu w kg (zaokrąglona do 0,5 kg). */
@@ -83,6 +84,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       {
         id: p.id,
         title: p.title,
+        category: p.category,
         image: p.image_url,
         price: Number(p.price),
         weight_kg: productWeightKg(p),
