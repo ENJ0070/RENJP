@@ -2,7 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { TOP_AGENT_KEYS } from "@/lib/agentRank";
 import { useEffect, useState, useMemo } from "react";
 import { panelDb } from "@/lib/panelDb";
-import { adminExportProducts, adminLogin, adminSellerUsernames } from "@/lib/secure.functions";
+import {
+  adminDeleteAllProducts,
+  adminDeleteSeller,
+  adminExportProducts,
+  adminLogin,
+  adminSellerUsernames,
+} from "@/lib/secure.functions";
 import { clearPanelToken, getPanelToken, setPanelToken } from "@/lib/panelToken";
 import { convertLink, extractSourceLink } from "@/lib/linkConverter";
 import { ProductCard } from "@/components/ProductCard";
@@ -2002,7 +2008,12 @@ function SellersTab() {
               <button
                 className={btnGhost}
                 onClick={async () => {
-                  await panelDb.from("sellers").delete().eq("id", s.id);
+                  if (!confirm(`Usunąć sprzedawcę „${s.name}” razem z jego produktami?`)) return;
+                  const res = await adminDeleteSeller({ data: { token: getPanelToken(), id: s.id } }).catch(
+                    () => ({ error: "Operation failed" }),
+                  );
+                  if (res.error) toast.error("Nie udało się usunąć sprzedawcy.");
+                  else toast.success("Sprzedawca usunięty.");
                   await refresh("sellers");
                   await refresh("products");
                 }}
@@ -2404,12 +2415,32 @@ function ImportTab() {
           show_on_home: sellerId ? showOnHome : true,
         };
       });
-      for (let i = 0; i < rows.length; i += 200) {
-        const { error } = await panelDb.from("products").insert(rows.slice(i, i + 200));
-        if (error) throw error;
+      const capped = rows.slice(0, 4000);
+      let done = 0;
+      let failed = 0;
+      for (let i = 0; i < capped.length; i += 50) {
+        const chunk = capped.slice(i, i + 50);
+        let res = await secureMutate({
+          data: { token: getPanelToken(), table: "products", op: "insert", values: chunk, id: null },
+        }).catch(() => ({ error: "fail" as string | null }));
+        if (res.error) {
+          // Ponów pojedynczo, żeby jeden zły wiersz nie blokował całej paczki.
+          for (const row of chunk) {
+            res = await secureMutate({
+              data: { token: getPanelToken(), table: "products", op: "insert", values: row, id: null },
+            }).catch(() => ({ error: "fail" }));
+            if (res.error) failed++;
+            else done++;
+          }
+        } else done += chunk.length;
+        setMsg(`Importuję... ${done}/${capped.length}`);
       }
       await refresh("products");
-      setMsg(`Zaimportowano ${rows.length} produktów.`);
+      setMsg(
+        `Zaimportowano ${done} z ${capped.length} produktów.` +
+          (failed ? ` Nieudane: ${failed}.` : "") +
+          (rows.length > 4000 ? " Limit to 4000 na raz." : ""),
+      );
       setText("");
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Import nie powiódł się.");
@@ -2454,6 +2485,25 @@ function ImportTab() {
         </label>
         <button className={btnGhost} onClick={() => void downloadCsv()}>
           ⬇ Pobierz CSV produktów ({(allProducts ?? []).length})
+        </button>
+        <button
+          className="rounded-lg border border-destructive px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10"
+          onClick={async () => {
+            const who = sellerId
+              ? `wszystkie produkty sprzedawcy „${(sellers ?? []).find((s) => s.id === sellerId)?.name ?? ""}”`
+              : "WSZYSTKIE produkty na stronie";
+            const pass = prompt(`Usunąć ${who}? Wpisz hasło administratora:`);
+            if (!pass) return;
+            const res = await adminDeleteAllProducts({
+              data: { token: getPanelToken(), passwordHash: await sha256Hex(pass), sellerId: sellerId || null },
+            }).catch(() => ({ error: "Operation failed", deleted: 0 }));
+            if (res.error === "Wrong password") toast.error("Złe hasło.");
+            else if (res.error) toast.error("Nie udało się usunąć produktów.");
+            else toast.success(`Usunięto ${res.deleted} produktów.`);
+            await refresh("products");
+          }}
+        >
+          🗑 Usuń wszystkie produkty{sellerId ? " sprzedawcy" : ""}
         </button>
       </div>
 

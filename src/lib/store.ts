@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPanelToken } from "@/lib/panelToken";
 import { uploadImage, getShippingRates } from "@/lib/secure.functions";
 import { withMyRef } from "@/lib/linkConverter";
+import type { Tables } from "@/integrations/supabase/types";
 
 export type Agent = {
   id: string;
