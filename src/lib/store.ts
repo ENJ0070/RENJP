@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPanelToken } from "@/lib/panelToken";
 import { uploadImage, getShippingRates } from "@/lib/secure.functions";
 import { withMyRef } from "@/lib/linkConverter";
+import type { Tables } from "@/integrations/supabase/types";
 
 export type Agent = {
   id: string;
@@ -146,7 +147,20 @@ export const useSellers = () =>
       const remote = error ? [] : ((data ?? []) as Seller[]);
       // Konta lokalne uzupełniają listę z bazy (te same id nie są duplikowane).
       const merged = [...remote];
-      for (const s of LOCAL_SELLERS_PUBLIC) if (!merged.some((r) => r.id === s.id)) merged.push(s);
+      let removed: string[] = [];
+      try {
+        const { data: st } = await supabase
+          .from("settings")
+          .select("value")
+          .eq("key", "deleted_local_sellers")
+          .maybeSingle();
+        const v = JSON.parse(st?.value || "[]");
+        if (Array.isArray(v)) removed = v.map(String);
+      } catch {
+        /* ignore */
+      }
+      for (const s of LOCAL_SELLERS_PUBLIC)
+        if (!removed.includes(s.id) && !merged.some((r) => r.id === s.id)) merged.push(s);
       return merged;
     },
   });
@@ -226,12 +240,20 @@ export const useProducts = () =>
   useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("display_order", { ascending: true })
-        .order("created_at", { ascending: false });
-      if (error) throw error;
+      // Pobieramy stronami po 1000 (limit serwera) — maks. 4000 produktów.
+      const data: Tables<"products">[] = [];
+      for (let from = 0; from < 4000; from += 1000) {
+        const { data: page, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("display_order", { ascending: true })
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, from + 999);
+        if (error) throw error;
+        data.push(...((page ?? []) as Tables<"products">[]));
+        if (!page || page.length < 1000) break;
+      }
       return (data ?? []).map((p) => {
         const main = p.image_url ?? null;
         // Galeria bywa zduplikowana (to samo zdjęcie kilka razy / kopia głównego).

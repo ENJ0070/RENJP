@@ -21,6 +21,11 @@ const RULES: Array<{ re: RegExp; kg: number }> = [
   { re: /(zegarek|watch|okular|glasses|biżuter|bizuter|jewel|naszyjnik|bransolet|portfel|wallet)/i, kg: 0.3 },
 ];
 
+/** Czy produkt to buty (mają pudełko). */
+export function isShoe(p: WeightInput): boolean {
+  return RULES[0]!.re.test(`${p.category ?? ""} ${p.title ?? ""}`);
+}
+
 /** Surowa szacowana waga produktu w kg. */
 export function rawWeightKg(p: WeightInput): number {
   const text = `${p.category ?? ""} ${p.title ?? ""}`;

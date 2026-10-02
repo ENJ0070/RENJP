@@ -75,10 +75,14 @@ export const sellerLogin = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { issueToken } = await import("@/lib/session.server");
     const { LOCAL_SELLERS } = await import("@/data/local-accounts.server");
+    const removed = await deletedLocalSellers();
 
     // 1) Konta lokalne (plik w kodzie) — działają bez bazy.
     const local = LOCAL_SELLERS.find(
-      (s) => s.active && s.username.toLowerCase() === data.username.toLowerCase(),
+      (s) =>
+        s.active &&
+        !removed.includes(s.id) &&
+        s.username.toLowerCase() === data.username.toLowerCase(),
     );
     if (local && local.passwordHash === data.passwordHash) {
       return {
@@ -215,13 +219,20 @@ export const adminExportProducts = createServerFn({ method: "POST" })
     const session = verifyToken(data.token);
     if (!session || session.role !== "admin") throw new Error("Unauthorized");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: products, error } = await supabaseAdmin
-      .from("products")
-      .select("*")
-      .order("display_order", { ascending: true })
-      .order("created_at", { ascending: false });
-    if (error) throw new Error("Export failed");
-    return (products ?? []) as Tables<"products">[];
+    const all: Tables<"products">[] = [];
+    for (let from = 0; from < 4000; from += 1000) {
+      const { data: page, error } = await supabaseAdmin
+        .from("products")
+        .select("*")
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
+        .range(from, Math.min(from + 999, 3999));
+      if (error) throw new Error("Export failed");
+      all.push(...((page ?? []) as Tables<"products">[]));
+      if (!page || page.length < 1000) break;
+    }
+    return all;
   });
 
 /** Publiczny licznik wyświetleń produktu — zwiększany po otwarciu karty. */
@@ -289,3 +300,75 @@ export const getShippingRates = createServerFn({ method: "GET" }).handler(async 
     return JSON.parse(JSON.stringify(LOCAL_SHIPPING_RATES)) as any[];
   }
 });
+
+async function deletedLocalSellers(): Promise<string[]> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("settings")
+      .select("value")
+      .eq("key", "deleted_local_sellers")
+      .maybeSingle();
+    const v = JSON.parse(data?.value || "[]");
+    return Array.isArray(v) ? v.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Admin-only: usuwa sprzedawcę razem z jego produktami (także konto wbudowane w kod). */
+export const adminDeleteSeller = createServerFn({ method: "POST" })
+  .inputValidator((data: { token: string; id: string }) => ({
+    token: cleanToken(data?.token),
+    id: String(data?.id ?? "").slice(0, 100),
+  }))
+  .handler(async ({ data }) => {
+    const { verifyToken } = await import("@/lib/session.server");
+    const session = verifyToken(data.token);
+    if (!session || session.role !== "admin") return { error: "Unauthorized" };
+    if (!data.id) return { error: "Missing id" };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: pErr } = await supabaseAdmin.from("products").delete().eq("seller_id", data.id);
+    if (pErr) return { error: "Operation failed" };
+    const { error: sErr } = await supabaseAdmin.from("sellers").delete().eq("id", data.id);
+    if (sErr) return { error: "Operation failed" };
+    const { LOCAL_SELLERS } = await import("@/data/local-accounts.server");
+    if (LOCAL_SELLERS.some((s) => s.id === data.id)) {
+      const list = Array.from(new Set([...(await deletedLocalSellers()), data.id]));
+      const { error } = await supabaseAdmin
+        .from("settings")
+        .upsert({ key: "deleted_local_sellers", value: JSON.stringify(list) }, { onConflict: "key" });
+      if (error) return { error: "Operation failed" };
+    }
+    return { error: null };
+  });
+
+/** Admin-only: usuwa WSZYSTKIE produkty (opcjonalnie tylko danego sprzedawcy) po potwierdzeniu hasłem. */
+export const adminDeleteAllProducts = createServerFn({ method: "POST" })
+  .inputValidator((data: { token: string; passwordHash: string; sellerId?: string | null }) => ({
+    token: cleanToken(data?.token),
+    passwordHash: String(data?.passwordHash ?? "").trim(),
+    sellerId: data?.sellerId ? String(data.sellerId).slice(0, 100) : null,
+  }))
+  .handler(async ({ data }) => {
+    const { verifyToken } = await import("@/lib/session.server");
+    const session = verifyToken(data.token);
+    if (!session || session.role !== "admin") return { error: "Unauthorized", deleted: 0 };
+    const { LOCAL_ADMIN } = await import("@/data/local-accounts.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let ok = data.passwordHash === LOCAL_ADMIN.passwordHash;
+    if (!ok) {
+      const { data: row } = await supabaseAdmin
+        .from("settings")
+        .select("value")
+        .eq("key", "admin_password_hash")
+        .maybeSingle();
+      ok = !!row?.value && row.value === data.passwordHash;
+    }
+    if (!ok) return { error: "Wrong password", deleted: 0 };
+    let q = supabaseAdmin.from("products").delete({ count: "exact" });
+    q = data.sellerId ? q.eq("seller_id", data.sellerId) : q.not("id", "is", null);
+    const { error, count } = await q;
+    if (error) return { error: "Operation failed", deleted: 0 };
+    return { error: null, deleted: count ?? 0 };
+  });

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCart, cartItemLink, cartWeightKg } from "@/lib/cart";
-import { formatKg } from "@/lib/weight";
+import { formatKg, isShoe } from "@/lib/weight";
 import { useCurrency, formatPrice } from "@/lib/currency";
 import { useLang } from "@/lib/i18n";
 import { LOCAL_SHIPPING_RATES } from "@/data/localShipping";
@@ -60,7 +60,12 @@ function CartPage() {
     const val = table[key as keyof typeof table];
     return typeof val === "number" ? val : rate.base_price + rate.price_per_kg * kg;
   };
-  const estimateShipping = selectedRate ? priceFor1kg(selectedRate) : null;
+  // Bez pudełek: -20 zł za każde pudełko od butów oraz -4,5% od ceny wysyłki.
+  const shoeCount = items.filter((i) => isShoe(i)).length;
+  const baseShipping = selectedRate ? priceFor1kg(selectedRate) : null;
+  const boxDiscount = !withBox && baseShipping != null ? baseShipping * 0.045 + shoeCount * 20 : 0;
+  const estimateShipping =
+    baseShipping != null ? Math.max(0, Math.round((baseShipping - boxDiscount) * 100) / 100) : null;
 
   return (
     <main className="min-h-screen px-4 pb-20 pt-6 sm:px-6">
@@ -299,6 +304,11 @@ function CartPage() {
                 : t("cart.selectLine", "Wybierz linię wysyłkową")}
             </button>
 
+            {!withBox && selectedRate ? (
+              <p className="mt-3 text-center text-xs font-semibold text-primary">
+                Bez pudełek: −4,5% wysyłki{shoeCount ? ` i −${shoeCount * 20} zł za pudełka od butów` : ""} (oszczędzasz {formatPrice(boxDiscount, currency)})
+              </p>
+            ) : null}
             <p className="mt-3 text-center text-xs text-muted-foreground">
               Koszt orientacyjny dla {formatKg(estimateWeightKg || 1)} — wagi są szacowane i zostaną
               doprecyzowane.
