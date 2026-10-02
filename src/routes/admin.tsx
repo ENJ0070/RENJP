@@ -8,7 +8,9 @@ import {
   adminExportProducts,
   adminLogin,
   adminSellerUsernames,
+  secureMutate,
 } from "@/lib/secure.functions";
+import { toast } from "sonner";
 import { clearPanelToken, getPanelToken, setPanelToken } from "@/lib/panelToken";
 import { convertLink, extractSourceLink } from "@/lib/linkConverter";
 import { ProductCard } from "@/components/ProductCard";
@@ -2458,7 +2460,7 @@ function ImportTab() {
         rozmiarów oddziel przecinkiem. Działa też po polsku (nazwa, kategoria, cena, zdjecia...).
       </p>
 
-      <div className="mb-4 grid gap-3 rounded-xl border border-dashed border-primary/40 bg-secondary/40 p-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
+      <div className="mb-4 grid gap-3 rounded-xl border border-dashed border-primary/40 bg-secondary/40 p-3 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto] sm:items-end">
         <label className="text-xs font-semibold text-muted-foreground">
           Przypisz import do sprzedawcy
           <select
