@@ -35,9 +35,7 @@ export async function getJson(url: string): Promise<any | null> {
  */
 export async function fetchAgentDetails(rawUrl: string): Promise<AgentDetails | null> {
   const usfans = await fetchUsfansDetails(rawUrl).catch(() => null);
-  if (usfans && (usfans.images.length || usfans.qcImages.length)) {
-    if (usfans.images.length) return usfans;
-  }
+  if (usfans?.images.length) return usfans;
   // USFans nie ma zdjęć produktu — próbujemy kolejno Litbuy, potem Kakobuy.
   const parsed = extractSourceLink(rawUrl);
   if (!parsed) return usfans;
@@ -87,7 +85,8 @@ async function scrapeAgentImages(pageUrl: string): Promise<string[]> {
   }
 }
 
-async function fetchUsfansDetails(rawUrl: string): Promise<AgentDetails | null> {
+/** Tylko USFans (szybkie) — używane do zdjęć QC. */
+export async function fetchUsfansDetails(rawUrl: string): Promise<AgentDetails | null> {
   const parsed = extractSourceLink(rawUrl);
   if (!parsed) return null;
 

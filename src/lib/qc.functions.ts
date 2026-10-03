@@ -14,7 +14,7 @@ export const qcForProduct = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { fetchAgentDetails, productSourceUrl } = await import("@/lib/agentApi");
+    const { fetchUsfansDetails, productSourceUrl } = await import("@/lib/agentApi");
 
     const { data: row } = await supabaseAdmin
       .from("products")
@@ -34,7 +34,7 @@ export const qcForProduct = createServerFn({ method: "POST" })
     const src = productSourceUrl(row as any);
     if (!src) return { ok: true as const, title: (row as any).title as string, images: [] };
 
-    const details = await fetchAgentDetails(src).catch(() => null);
+    const details = await fetchUsfansDetails(src).catch(() => null);
     const images = (details?.qcImages ?? []).slice(0, 10);
     if (images.length) {
       await supabaseAdmin.from("products").update({ qc_images: images }).eq("id", data.productId);
