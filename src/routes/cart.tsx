@@ -62,10 +62,14 @@ function CartPage() {
   };
   // Bez pudełek: -20 zł za każde pudełko od butów oraz -4,5% od ceny wysyłki.
   const shoeCount = items.filter((i) => isShoe(i)).length;
+  const discountFor = (base: number) => (!withBox ? base * 0.045 + shoeCount * 20 : 0);
+  const finalPrice = (rate: (typeof LOCAL_SHIPPING_RATES)[number]) => {
+    const base = priceFor1kg(rate);
+    return Math.max(0, Math.round((base - discountFor(base)) * 100) / 100);
+  };
   const baseShipping = selectedRate ? priceFor1kg(selectedRate) : null;
-  const boxDiscount = !withBox && baseShipping != null ? baseShipping * 0.045 + shoeCount * 20 : 0;
-  const estimateShipping =
-    baseShipping != null ? Math.max(0, Math.round((baseShipping - boxDiscount) * 100) / 100) : null;
+  const boxDiscount = baseShipping != null ? discountFor(baseShipping) : 0;
+  const estimateShipping = selectedRate ? finalPrice(selectedRate) : null;
 
   return (
     <main className="min-h-screen px-4 pb-20 pt-6 sm:px-6">
@@ -263,7 +267,7 @@ function CartPage() {
                 <p className="text-sm text-muted-foreground">{t("cart.noShipping", "Brak dostępnych linii wysyłkowych.")}</p>
               ) : (
                 shippingLines.map((rate) => {
-                  const estimate = priceFor1kg(rate);
+                  const estimate = finalPrice(rate);
                   const active = selectedLine === rate.id;
                   return (
                     <button
