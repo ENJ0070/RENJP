@@ -50,9 +50,17 @@ export function OutfitGenerator({
   const { t } = useLang();
   const [jacketOn, setJacketOn] = useState(false);
   const [womenOnly, setWomenOnly] = useState(false);
+  const [maxPrice, setMaxPrice] = useState<Partial<Record<SlotKey, number>>>({});
   const pools = useMemo(
-    () => ALL_SLOTS.map((slot) => ({ slot, items: pickPool(products, slot, womenOnly) })),
-    [products, womenOnly],
+    () =>
+      ALL_SLOTS.map((slot) => {
+        const cap = maxPrice[slot.key];
+        const items = pickPool(products, slot, womenOnly).filter(
+          (p) => !cap || Number(p.price) <= cap,
+        );
+        return { slot, items };
+      }),
+    [products, womenOnly, maxPrice],
   );
   const slots = useMemo(
     () => ALL_SLOTS.filter((s) => s.key !== "jacket" || jacketOn),
@@ -195,6 +203,22 @@ export function OutfitGenerator({
                   </button>
                 ) : null}
               </div>
+              <label className="flex items-center gap-2 border-b border-border px-3 py-1.5 text-[10px] font-semibold text-muted-foreground">
+                Max
+                <input
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  placeholder="bez limitu"
+                  value={maxPrice[slot.key] ?? ""}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    setMaxPrice((m) => ({ ...m, [slot.key]: v > 0 ? v : undefined }));
+                  }}
+                  className="w-full min-w-0 rounded-md border border-border bg-surface-deep px-2 py-1 text-[11px] text-foreground outline-none focus:border-primary"
+                />
+                PLN
+              </label>
               <div className="aspect-square overflow-hidden bg-secondary">
                 {item?.image_url ? (
                   <img

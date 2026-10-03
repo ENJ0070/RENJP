@@ -1,8 +1,9 @@
+import { PT, PT_BR } from "@/lib/i18n.pt";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { safeStorage, useSettings } from "@/lib/store";
 import { EXTRA_TRANSLATIONS } from "@/lib/i18n.translations";
 
-export type Lang = "pl" | "en" | "de" | "fr" | "es" | "it" | "zh";
+export type Lang = "pl" | "en" | "de" | "fr" | "es" | "it" | "zh" | "pt" | "pt-BR";
 
 /** Lista języków w przełączniku (kod, etykieta, kod kraju flagi). */
 export const LANGS: { code: Lang; label: string; flag: string; country: string }[] = [
@@ -13,6 +14,8 @@ export const LANGS: { code: Lang; label: string; flag: string; country: string }
   { code: "es", label: "Español", flag: "🇪🇸", country: "es" },
   { code: "it", label: "Italiano", flag: "🇮🇹", country: "it" },
   { code: "zh", label: "中文", flag: "🇨🇳", country: "cn" },
+  { code: "pt", label: "Português", flag: "🇵🇹", country: "pt" },
+  { code: "pt-BR", label: "Português (Brasil)", flag: "🇧🇷", country: "br" },
 ];
 
 /** Obrazek flagi (SVG) – emoji flag nie wyświetla się na Windows. */
@@ -466,6 +469,9 @@ for (const [lang, entries] of Object.entries(EXTRA)) {
     if (DICT[key]) DICT[key]![lang as Lang] = value;
   }
 }
+
+for (const [key, value] of Object.entries(PT)) if (DICT[key] && value) DICT[key]!.pt = value;
+for (const [key, value] of Object.entries(PT_BR)) if (DICT[key] && value) DICT[key]!["pt-BR"] = value;
 
 export const DICT_KEYS = Object.keys(DICT);
 

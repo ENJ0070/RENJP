@@ -20,7 +20,7 @@ export function QcPhotos({
   autoLoad = false,
   initialImages,
   cols,
-  showMore = true,
+  showMore = false,
   emptyText = "Nie znaleziono zdjęć QC.",
   buttonText = "Pokaż więcej",
   startText = "Pokaż zdjęcia QC",
@@ -47,11 +47,8 @@ export function QcPhotos({
     setBusy(true);
     setTouched(true);
     const next = page + 1;
-    const started = Date.now();
     try {
       const res = await loadPage(next);
-      const wait = 900 - (Date.now() - started);
-      if (wait > 0) await new Promise((r) => setTimeout(r, wait));
       setImages((prev) => Array.from(new Set([...prev, ...res.images])));
       setHasMore(res.hasMore);
       setPage(next);

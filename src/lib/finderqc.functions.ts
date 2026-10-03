@@ -16,8 +16,8 @@ export const finderQcByLink = createServerFn({ method: "POST" })
 
     // Najpierw magazyn USFans — odpowiada od razu, więc wyszukiwarka nie zwalnia.
     if (data.page === 1) {
-      const { fetchAgentDetails } = await import("@/lib/agentApi");
-      const details = await fetchAgentDetails(data.url).catch(() => null);
+      const { fetchUsfansDetails } = await import("@/lib/agentApi");
+      const details = await fetchUsfansDetails(data.url).catch(() => null);
       const images = (details?.qcImages ?? []).filter((u) => /^https?:\/\//i.test(u));
       if (images.length) {
         return {
@@ -96,8 +96,8 @@ export const finderQcByProduct = createServerFn({ method: "POST" })
     }
 
     if (src) {
-      const { fetchAgentDetails } = await import("@/lib/agentApi");
-      const details = await fetchAgentDetails(src).catch(() => null);
+      const { fetchUsfansDetails } = await import("@/lib/agentApi");
+      const details = await fetchUsfansDetails(src).catch(() => null);
       const usfans = (details?.qcImages ?? []).filter((u) => /^https?:\/\//i.test(u));
       if (usfans.length) {
         await supabaseAdmin
