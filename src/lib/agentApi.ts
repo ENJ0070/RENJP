@@ -34,6 +34,60 @@ export async function getJson(url: string): Promise<any | null> {
  * sprowadzany do linku źródłowego Weidian / Taobao / 1688).
  */
 export async function fetchAgentDetails(rawUrl: string): Promise<AgentDetails | null> {
+  const usfans = await fetchUsfansDetails(rawUrl).catch(() => null);
+  if (usfans && (usfans.images.length || usfans.qcImages.length)) {
+    if (usfans.images.length) return usfans;
+  }
+  // USFans nie ma zdjęć produktu — próbujemy kolejno Litbuy, potem Kakobuy.
+  const parsed = extractSourceLink(rawUrl);
+  if (!parsed) return usfans;
+  for (const page of [litbuyUrl(parsed), kakobuyUrl(parsed)]) {
+    const images = await scrapeAgentImages(page).catch(() => []);
+    if (images.length) {
+      return {
+        title: usfans?.title ?? "",
+        priceCny: usfans?.priceCny ?? 0,
+        images,
+        colorImages: usfans?.colorImages ?? [],
+        qcImages: usfans?.qcImages ?? [],
+        sizes: usfans?.sizes ?? [],
+      };
+    }
+  }
+  return usfans;
+}
+
+const LITBUY_CHANNEL: Record<SourcePlatform, string> = { "1688": "1688", taobao: "taobao", weidian: "weidian" };
+
+function litbuyUrl(p: { id: string | number; platform: SourcePlatform }) {
+  return `https://www.litbuy.com/products/details?id=${p.id}&channel=${LITBUY_CHANNEL[p.platform]}`;
+}
+
+function kakobuyUrl(p: { url: string }) {
+  return `https://www.kakobuy.com/item/details?url=${encodeURIComponent(p.url)}`;
+}
+
+/** Zdjęcia produktu ze strony agenta (renderowanej przez pośrednika) — bez grafik samego agenta. */
+async function scrapeAgentImages(pageUrl: string): Promise<string[]> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 25000);
+  try {
+    const res = await fetch(`https://r.jina.ai/${pageUrl}`, {
+      headers: { "x-respond-with": "markdown", "x-wait-for-selector": "img" },
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return [];
+    const text = await res.text();
+    const urls = text.match(/https:\/\/[^)"\s]+\.(?:jpe?g|png|webp)[^)"\s]*/gi) ?? [];
+    return Array.from(
+      new Set(urls.filter((u) => /alicdn|geilicdn|weidian|1688|taobao|tbcdn/i.test(u))),
+    ).slice(0, 20);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchUsfansDetails(rawUrl: string): Promise<AgentDetails | null> {
   const parsed = extractSourceLink(rawUrl);
   if (!parsed) return null;
 
