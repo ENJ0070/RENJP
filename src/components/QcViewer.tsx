@@ -29,7 +29,7 @@ export function QcGrid({
             onClick={() => setOpen(i)}
             className="aspect-square overflow-hidden rounded-xl border border-border transition-colors hover:border-primary"
           >
-            <img src={u} alt={`QC ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
+            <img src={u} alt={`QC ${i + 1}`} loading="lazy" decoding="async" className="h-full w-full object-cover" />
           </button>
         ))}
       </div>

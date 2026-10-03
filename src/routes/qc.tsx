@@ -42,7 +42,7 @@ function QcPage() {
   const [error, setError] = useState("");
 
   const loadLinkPage = useCallback(
-    (page: number) => runLink({ data: { url: query, page, pageSize: 3 } }),
+    (page: number) => runLink({ data: { url: query, page, pageSize: 4 } }),
     [runLink, query],
   );
   const loadProductPage = useCallback(
@@ -121,7 +121,7 @@ function QcPage() {
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {withQc.slice(0, 24).map((p) => (
+              {withQc.slice(0, 12).map((p) => (
                 <article key={p.id} className="rounded-2xl border border-border bg-surface p-3">
                   <p className="mb-2 truncate text-sm font-semibold">{p.title}</p>
                   <QcGrid images={(p.qc_images ?? []).slice(0, 6)} cols="grid-cols-3" />
