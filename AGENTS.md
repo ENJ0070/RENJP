@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep public-site cosmic-web decoration in a single root-level canvas, excluding admin and seller panels, so visual motion does not duplicate across routes or intercept clicks.

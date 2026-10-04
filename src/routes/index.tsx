@@ -35,6 +35,8 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Wyszukiwarka findsów z QC i bezpośrednimi linkami do agentów.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
@@ -94,7 +96,7 @@ function Index() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <section className="mb-8 rounded-3xl border border-border bg-surface/60 p-8 text-center glow-ring">
+      <section className="relative mb-8 overflow-hidden border-b border-border/60 px-4 py-10 text-center sm:py-16">
         <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">
           {t("home.kicker")}
         </p>

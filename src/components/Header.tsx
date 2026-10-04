@@ -74,7 +74,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 sm:px-6">
       {/* Na desktopie wyspa rozciąga się do szerokości menu (dłuższe tłumaczenia), zamiast nachodzić na logo. */}
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 rounded-2xl border border-border/60 bg-surface-deep/85 px-4 py-3 shadow-lg backdrop-blur-xl glow-ring sm:px-6 lg:w-fit lg:min-w-[min(100%,80rem)] lg:max-w-full">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 rounded-lg border border-border bg-surface-deep/95 px-4 py-3 shadow-2xl backdrop-blur-xl sm:px-6 lg:w-fit lg:min-w-[min(100%,80rem)] lg:max-w-full">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex shrink-0 items-center gap-3">
             {logo ? (
@@ -84,7 +84,7 @@ export function Header() {
                 className="h-10 w-10 rounded-xl object-cover glow-ring"
               />
             ) : null}
-            <span className="font-display text-lg font-bold tracking-tight text-gradient-brand">
+            <span className="font-display text-lg font-bold tracking-tight text-foreground">
               PKMREPS
             </span>
           </Link>
