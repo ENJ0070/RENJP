@@ -17,7 +17,7 @@ import { Header } from "@/components/Header";
 import { FloatingIsland } from "@/components/FloatingIsland";
 import { PromoModal } from "@/components/PromoModal";
 import { ScrollToTop } from "@/components/ScrollToTop";
-import { StickersBackground } from "@/components/StickersBackground";
+import { CosmicWeb } from "@/components/CosmicWeb";
 import { LanguageProvider } from "@/lib/i18n";
 import { CurrencyProvider } from "@/lib/currency";
 import { CartProvider } from "@/lib/cart";
@@ -147,8 +147,8 @@ function RootComponent() {
       <LanguageProvider>
         <CurrencyProvider>
         <CartProvider>
-        <div className="relative min-h-screen">
-          {!isPanel && <StickersBackground />}
+        <div className="relative isolate min-h-screen">
+          {!isPanel && <CosmicWeb />}
           {!isPanel && <Header />}
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />

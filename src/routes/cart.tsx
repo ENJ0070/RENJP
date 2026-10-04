@@ -39,6 +39,8 @@ function CartPage() {
   const setAgent = (name: string) => {
     setAgentState(name);
     safeStorage.set(AGENT_KEY, name);
+    const signup = agents.find((a) => a.name === name)?.referral_url;
+    if (signup && /^https?:\/\//i.test(signup)) window.open(signup, "_blank", "noopener,noreferrer");
   };
   // Domyślnie pierwszy agent z listy (Litbuy), dopóki użytkownik nie wybierze innego.
   const activeAgent = agent ?? agents[0]?.name ?? null;
@@ -133,6 +135,7 @@ function CartPage() {
                       <button
                         key={a.id}
                         onClick={() => setAgent(a.name)}
+                        title={a.referral_url ? `Zarejestruj się w ${a.name}` : a.name}
                         className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-all ${
                           active
                             ? "border-primary bg-primary/10 text-primary glow-ring"
