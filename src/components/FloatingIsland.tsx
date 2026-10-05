@@ -1,7 +1,7 @@
 import { useSocialLinks } from "@/lib/store";
 import { useCart } from "@/lib/cart";
 import { useCurrency, CURRENCIES, formatPrice } from "@/lib/currency";
-import { LANGS, flagUrl, useLang } from "@/lib/i18n";
+import { LANGS, LanguageFlag, useLang } from "@/lib/i18n";
 
 function IconLink({
   href,
@@ -150,14 +150,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
                 : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
-            <img
-              src={flagUrl(l.country)}
-              alt=""
-              aria-hidden="true"
-              width={22}
-              height={16}
-              className="h-4 w-[22px] rounded-[3px] object-cover shadow-sm"
-            />
+            <LanguageFlag country={l.country} label={l.label} />
             <span className="uppercase">{l.code}</span>
           </button>
         ))}

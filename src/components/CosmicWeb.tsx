@@ -48,8 +48,8 @@ export function CosmicWeb() {
           const dist = Math.hypot(p.x - q.x, p.y - q.y);
           if (dist > 185) continue;
           const proximity = Math.max(0, 1 - Math.min(Math.hypot((p.x + q.x) / 2 - focus.x, (p.y + q.y) / 2 - focus.y) / 300, 1));
-          ctx.strokeStyle = `rgba(195, 212, 223, ${0.045 + proximity * 0.25})`;
-          ctx.lineWidth = proximity > 0.2 ? 0.8 : 0.5;
+          ctx.strokeStyle = `rgba(195, 212, 223, ${0.11 + proximity * 0.38})`;
+          ctx.lineWidth = proximity > 0.2 ? 1.2 : 0.8;
           ctx.beginPath();
           ctx.moveTo(p.x + (focus.x - p.x) * proximity * 0.045, p.y + (focus.y - p.y) * proximity * 0.045);
           ctx.lineTo(q.x + (focus.x - q.x) * proximity * 0.045, q.y + (focus.y - q.y) * proximity * 0.045);
@@ -60,8 +60,8 @@ export function CosmicWeb() {
         const nearby = points.filter((p) => Math.hypot(p.x - focus.x, p.y - focus.y) < 190).sort((a, b) => Math.atan2(a.y - focus.y, a.x - focus.x) - Math.atan2(b.y - focus.y, b.x - focus.x));
         nearby.forEach((p, i) => {
           const next = nearby[(i + 1) % nearby.length];
-          ctx.strokeStyle = "rgba(230, 241, 246, 0.24)";
-          ctx.lineWidth = 0.7;
+          ctx.strokeStyle = "rgba(230, 241, 246, 0.55)";
+          ctx.lineWidth = 1.15;
           ctx.beginPath();
           ctx.moveTo(focus.x, focus.y);
           ctx.lineTo(p.x, p.y);
@@ -100,5 +100,5 @@ export function CosmicWeb() {
     };
   }, []);
 
-  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 opacity-80" />;
+  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0" />;
 }
