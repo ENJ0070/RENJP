@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSettings } from "@/lib/store";
-import { LANGS, flagUrl, useLang } from "@/lib/i18n";
+import { LANGS, LanguageFlag, useLang } from "@/lib/i18n";
 import { useCart } from "@/lib/cart";
 import { SettingsPanel } from "@/components/FloatingIsland";
 
@@ -37,13 +37,7 @@ function HeaderActions() {
             : "border-border bg-surface"
         }`}
       >
-        <img
-          src={flagUrl(current.country)}
-          alt={current.label}
-          width={22}
-          height={16}
-          className="h-4 w-[22px] rounded-[3px] object-cover shadow-sm"
-        />
+        <LanguageFlag country={current.country} label={current.label} />
         <span aria-hidden="true">⚙️</span>
       </button>
 

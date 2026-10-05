@@ -206,13 +206,12 @@ export function OutfitGenerator({
               <label className="flex items-center gap-2 border-b border-border px-3 py-1.5 text-[10px] font-semibold text-muted-foreground">
                 Max
                 <input
-                  type="number"
-                  min={0}
-                  inputMode="numeric"
-                  placeholder="bez limitu"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="max"
                   value={maxPrice[slot.key] ?? ""}
                   onChange={(e) => {
-                    const v = Number(e.target.value);
+                    const v = Number(e.target.value.replace(",", "."));
                     setMaxPrice((m) => ({ ...m, [slot.key]: v > 0 ? v : undefined }));
                   }}
                   className="w-full min-w-0 rounded-md border border-border bg-surface-deep px-2 py-1 text-[11px] text-foreground outline-none focus:border-primary"

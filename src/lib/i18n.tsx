@@ -1,9 +1,9 @@
-import { PT, PT_BR } from "@/lib/i18n.pt";
+import { PT } from "@/lib/i18n.pt";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { safeStorage, useSettings } from "@/lib/store";
 import { EXTRA_TRANSLATIONS } from "@/lib/i18n.translations";
 
-export type Lang = "pl" | "en" | "de" | "fr" | "es" | "it" | "zh" | "pt" | "pt-BR";
+export type Lang = "pl" | "en" | "de" | "fr" | "es" | "it" | "zh" | "pt";
 
 /** Lista języków w przełączniku (kod, etykieta, kod kraju flagi). */
 export const LANGS: { code: Lang; label: string; flag: string; country: string }[] = [
@@ -14,13 +14,26 @@ export const LANGS: { code: Lang; label: string; flag: string; country: string }
   { code: "es", label: "Español", flag: "🇪🇸", country: "es" },
   { code: "it", label: "Italiano", flag: "🇮🇹", country: "it" },
   { code: "zh", label: "中文", flag: "🇨🇳", country: "cn" },
-  { code: "pt", label: "Português", flag: "🇵🇹", country: "pt" },
-  { code: "pt-BR", label: "Português (Brasil)", flag: "🇧🇷", country: "br" },
+  { code: "pt", label: "Português", flag: "🇵🇹🇧🇷", country: "pt-br" },
 ];
 
 /** Obrazek flagi (SVG) – emoji flag nie wyświetla się na Windows. */
 export function flagUrl(country: string): string {
   return `https://flagcdn.com/${country}.svg`;
+}
+
+/** Jedna, łamana flaga portugalska: Portugalia po lewej, Brazylia po prawej. */
+export function LanguageFlag({ country, label = "" }: { country: string; label?: string }) {
+  if (country !== "pt-br") {
+    return <img src={flagUrl(country)} alt={label} width={22} height={16} className="h-4 w-[22px] rounded-[3px] object-cover shadow-sm" />;
+  }
+
+  return (
+    <span role="img" aria-label={label} className="relative block h-4 w-[22px] overflow-hidden rounded-[3px] shadow-sm">
+      <img src={flagUrl("pt")} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover [clip-path:polygon(0_0,62%_0,38%_100%,0_100%)]" />
+      <img src={flagUrl("br")} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover [clip-path:polygon(62%_0,100%_0,100%_100%,38%_100%)]" />
+    </span>
+  );
 }
 
 const LANG_CODES = LANGS.map((l) => l.code);
@@ -471,7 +484,6 @@ for (const [lang, entries] of Object.entries(EXTRA)) {
 }
 
 for (const [key, value] of Object.entries(PT)) if (DICT[key] && value) DICT[key]!.pt = value;
-for (const [key, value] of Object.entries(PT_BR)) if (DICT[key] && value) DICT[key]!["pt-BR"] = value;
 
 export const DICT_KEYS = Object.keys(DICT);
 
@@ -486,6 +498,7 @@ const LangContext = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({
 function readSavedLang(): Lang | null {
   try {
     const stored = globalThis.localStorage?.getItem("pkmr_lang") ?? safeStorage.get("pkmr_lang");
+    if (stored === "pt-BR") return "pt";
     return stored && LANG_CODES.includes(stored as Lang) ? (stored as Lang) : null;
   } catch {
     return safeStorage.get("pkmr_lang") as Lang | null;
