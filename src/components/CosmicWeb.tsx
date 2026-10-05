@@ -41,8 +41,10 @@ export function CosmicWeb() {
       ctx.clearRect(0, 0, w, h);
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
+        if (!p) continue;
         for (let j = i + 1; j < points.length; j++) {
           const q = points[j];
+          if (!q) continue;
           const dist = Math.hypot(p.x - q.x, p.y - q.y);
           if (dist > 185) continue;
           const proximity = Math.max(0, 1 - Math.min(Math.hypot((p.x + q.x) / 2 - focus.x, (p.y + q.y) / 2 - focus.y) / 300, 1));
