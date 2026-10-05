@@ -138,24 +138,22 @@ function Index() {
         <label className="flex-1 text-xs font-semibold text-muted-foreground">
           {t("finder.priceFrom")}
           <input
-            type="number"
+            type="text"
             inputMode="decimal"
-            min={0}
             value={min}
             onChange={(e) => setMin(e.target.value)}
-            placeholder="0"
+            placeholder="min"
             className={`${inputCls} mt-1`}
           />
         </label>
         <label className="flex-1 text-xs font-semibold text-muted-foreground">
           {t("finder.priceTo")}
           <input
-            type="number"
+            type="text"
             inputMode="decimal"
-            min={0}
             value={max}
             onChange={(e) => setMax(e.target.value)}
-            placeholder="9999"
+            placeholder="max"
             className={`${inputCls} mt-1`}
           />
         </label>
