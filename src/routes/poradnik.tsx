@@ -25,6 +25,8 @@ export const Route = createFileRoute("/poradnik")({
         property: "og:description",
         content: "Interaktywne narzędzia i instrukcje zamawiania przez agenta.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: PoradnikPage,
@@ -148,7 +150,7 @@ function QcInspector() {
     try {
       const res = await run({ data: { url } });
       if (!res.ok) setMsg(t("qc.notFound", "Nie znaleziono produktu dla tego linku."));
-      else setImages([...res.qcImages, ...res.colorImages]);
+      else setImages(res.qcImages);
     } catch {
       setMsg(t("qc.notFound", "Nie znaleziono produktu dla tego linku."));
     } finally {
@@ -292,9 +294,9 @@ function PoradnikPage() {
       </p>
 
       <section className="mt-8 grid gap-5 lg:grid-cols-3">
-        <PackageTracker />
-        <QcInspector />
-        <LinkConverter />
+        <div id="tracking" className="min-w-0 scroll-mt-24"><PackageTracker /></div>
+        <div id="qc-finder" className="min-w-0 scroll-mt-24"><QcInspector /></div>
+        <div id="converter" className="min-w-0 scroll-mt-24"><LinkConverter /></div>
       </section>
 
       <section className="mt-8">

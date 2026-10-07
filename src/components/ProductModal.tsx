@@ -11,6 +11,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { QcPhotos } from "@/components/QcPhotos";
 import { formatKg, productWeightKg } from "@/lib/weight";
 import { finderQcByProduct } from "@/lib/finderqc.functions";
+import { StableImage } from "@/components/StableImage";
 
 /** Interactive shopping modal: pick colorway + size, then buy through an agent. */
 export function ProductModal({
@@ -77,8 +78,9 @@ export function ProductModal({
           <div>
             <div className="aspect-square overflow-hidden rounded-2xl border border-border bg-secondary">
               {gallery[active] ? (
-                <img
+                <StableImage
                   src={gallery[active]}
+                  fallbacks={gallery.filter((_, i) => i !== active)}
                   alt={product.title}
                   className="h-full w-full object-cover"
                 />
@@ -97,7 +99,7 @@ export function ProductModal({
                     aria-label={`Kolorystyka ${i + 1}`}
                     className={`h-12 w-12 overflow-hidden rounded-lg border ${i === active ? "border-primary glow-ring" : "border-border"}`}
                   >
-                    <img src={u} alt="" className="h-full w-full object-cover" />
+                    <StableImage src={u} alt="" loading="lazy" className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>

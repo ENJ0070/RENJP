@@ -10,3 +10,5 @@
 <!-- LOVABLE:END -->
 
 - Keep public-site cosmic-web decoration in a single root-level canvas, excluding admin and seller panels, so visual motion does not duplicate across routes or intercept clicks.
+- Archive known product CDN images in content-addressed public storage before saving product media; preserve source URLs on failure so unavailable providers cannot erase photos.
+- Use StableImage for product and QC displays so failures advance through gallery alternatives without blank or broken-image icons.
