@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
+import { StableImage } from "@/components/StableImage";
 
 /** Siatka miniatur QC — klik otwiera przeglądarkę ze zoomem i obrotem. */
 export function QcGrid({
@@ -29,7 +30,7 @@ export function QcGrid({
             onClick={() => setOpen(i)}
             className="aspect-square overflow-hidden rounded-xl border border-border transition-colors hover:border-primary"
           >
-            <img src={u} alt={`QC ${i + 1}`} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            <StableImage src={u} alt={`QC ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
           </button>
         ))}
       </div>
@@ -133,7 +134,7 @@ export function QcLightbox({
         onPointerUp={() => setDrag(null)}
         onPointerLeave={() => setDrag(null)}
       >
-        <img
+        <StableImage
           src={images[i]}
           alt={`QC ${i + 1}`}
           draggable={false}
@@ -173,7 +174,7 @@ export function QcLightbox({
               k === i ? "border-primary" : "border-white/20"
             }`}
           >
-            <img src={u} alt="" className="h-full w-full object-cover" />
+            <StableImage src={u} alt="" loading="lazy" className="h-full w-full object-cover" />
           </button>
         ))}
       </div>

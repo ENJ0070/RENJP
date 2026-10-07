@@ -188,10 +188,21 @@ export const secureMutate = createServerFn({ method: "POST" })
     const table = supabaseAdmin.from(data.table) as any;
     let error: { message: string } | null = null;
 
-    if (data.op === "insert") ({ error } = await table.insert(scopeValues(data.values)));
-    else if (data.op === "upsert") ({ error } = await table.upsert(scopeValues(data.values)));
+    let values = scopeValues(data.values);
+    if (data.table === "products" && data.op !== "delete" && values) {
+      const { archiveProductImages } = await import("@/lib/image-storage.server");
+      // Bulk CSV remains bounded; full galleries are archived by media sync.
+      if (Array.isArray(values)) {
+        const archived = [];
+        for (const row of values) archived.push(await archiveProductImages({ ...row, images: undefined, qc_images: undefined }).then((copy) => ({ ...row, image_url: copy.image_url })));
+        values = archived;
+      } else values = await archiveProductImages(values as Record<string, unknown>);
+    }
+
+    if (data.op === "insert") ({ error } = await table.insert(values));
+    else if (data.op === "upsert") ({ error } = await table.upsert(values));
     else if (data.op === "update")
-      ({ error } = await table.update(scopeValues(data.values)).eq("id", data.id));
+      ({ error } = await table.update(values).eq("id", data.id));
     else ({ error } = await table.delete().eq("id", data.id));
 
     return { error: error ? "Operation failed" : null };

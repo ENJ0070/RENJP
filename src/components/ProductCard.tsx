@@ -3,6 +3,7 @@ import { PriceTags, QualityBadges, VerifiedBadge } from "@/components/PriceTags"
 import type { Product } from "@/lib/store";
 import { useCart } from "@/lib/cart";
 import { useLang } from "@/lib/i18n";
+import { StableImage } from "@/components/StableImage";
 
 /**
  * Lightweight grid card: single image + views, title, category, badges,
@@ -23,8 +24,9 @@ function ProductCardBase({
     <article className="cv-card group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-all hover:-translate-y-1 hover:border-primary/60 hover:glow-ring">
       <div className="relative aspect-square overflow-hidden bg-secondary">
         {product.image_url ? (
-          <img
+          <StableImage
             src={product.image_url}
+            fallbacks={product.images}
             alt={product.title}
             loading="lazy"
             decoding="async"

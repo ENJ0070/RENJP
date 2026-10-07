@@ -40,6 +40,7 @@ export const syncProductMedia = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { fetchAgentDetails, productSourceUrl } = await import("@/lib/agentApi");
+    const { archiveProductImages } = await import("@/lib/image-storage.server");
 
     let query = supabaseAdmin
       .from("products")
@@ -62,6 +63,15 @@ export const syncProductMedia = createServerFn({ method: "POST" })
           const mainOk = Boolean(p.image_url && external(p.image_url));
           const currentImages = (p.images ?? []).filter(external);
           const currentQc = (p.qc_images ?? []).filter(external);
+          const archived = await archiveProductImages({ image_url: p.image_url, images: currentImages, qc_images: currentQc });
+          if (JSON.stringify(archived) !== JSON.stringify({ image_url: p.image_url, images: currentImages, qc_images: currentQc })) {
+            const { error: archiveError } = await supabaseAdmin.from("products").update(archived).eq("id", p.id);
+            if (archiveError) throw new Error("Nie udało się zapisać kopii zdjęć.");
+            p.image_url = archived.image_url;
+            currentImages.splice(0, currentImages.length, ...archived.images);
+            currentQc.splice(0, currentQc.length, ...archived.qc_images);
+            updated++;
+          }
           if (data.onlyMissing && mainOk && currentImages.length && currentQc.length) {
             return void skipped++;
           }
@@ -86,10 +96,11 @@ export const syncProductMedia = createServerFn({ method: "POST" })
           const patch: { images?: string[]; qc_images?: string[]; image_url?: string } = {};
           if ((!data.onlyMissing || !currentImages.length) && images.length) patch.images = images;
           if ((!data.onlyMissing || !currentQc.length) && qc.length) patch.qc_images = qc;
-          if (!mainOk && images.length) patch.image_url = images[0]!;
+           if (!mainOk && images[0]) patch.image_url = images[0];
           if (!Object.keys(patch).length) return void skipped++;
 
-          const { error: upErr } = await supabaseAdmin.from("products").update(patch).eq("id", p.id);
+          const savedPatch = await archiveProductImages(patch);
+          const { error: upErr } = await supabaseAdmin.from("products").update(savedPatch).eq("id", p.id);
           if (upErr) skipped++;
           else updated++;
         }),
