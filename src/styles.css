@@ -190,6 +190,7 @@
   height: 14px;
   border-radius: 999px;
   outline: none;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--muted-foreground) var(--range-progress, 0%), var(--secondary) var(--range-progress, 0%), var(--secondary) 100%);
 }
 .range-brand::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -198,8 +199,8 @@
   width: 30px;
   border-radius: 999px;
   background: var(--surface-deep);
-  border: 3px solid var(--brand-cyan);
-  box-shadow: 0 0 0 4px oklch(0.81 0.11 210 / 0.18), 0 0 18px oklch(0.81 0.11 210 / 0.3);
+  border: 3px solid var(--primary);
+  box-shadow: var(--glow-cyan);
   cursor: pointer;
   transition: transform 0.15s ease;
 }
@@ -211,8 +212,8 @@
   width: 26px;
   border-radius: 999px;
   background: var(--surface-deep);
-  border: 3px solid var(--brand-cyan);
-  box-shadow: 0 0 18px oklch(0.81 0.11 210 / 0.3);
+  border: 3px solid var(--primary);
+  box-shadow: var(--glow-cyan);
   cursor: pointer;
 }
 

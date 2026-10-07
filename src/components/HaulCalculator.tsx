@@ -9,6 +9,7 @@ import {
   type ShippingRate,
 } from "@/lib/store";
 import { useLang } from "@/lib/i18n";
+import type { CSSProperties } from "react";
 
 const MIN_KG = 0.5;
 const MAX_KG = 25;
@@ -98,9 +99,7 @@ export function HaulCalculator() {
           aria-label={t("calc.weightAria")}
           onChange={(e) => setKg(Number(e.target.value))}
           className="range-brand w-full cursor-pointer"
-          style={{
-            background: `linear-gradient(90deg, #00f2fe 0%, #0d9488 ${pct}%, rgba(148,163,184,0.18) ${pct}%, rgba(148,163,184,0.18) 100%)`,
-          }}
+          style={{ "--range-progress": `${pct}%` } as CSSProperties}
         />
         <div className="mt-2 flex justify-between text-[10px] font-semibold text-muted-foreground">
           <span>{MIN_KG} kg</span>
