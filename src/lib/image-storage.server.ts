@@ -43,15 +43,15 @@ export async function archiveImage(source: string): Promise<string> {
 export async function archiveProductImages<T extends Record<string, unknown>>(row: T): Promise<T> {
   const patch: Record<string, unknown> = { ...row };
   const urls = Array.from(new Set([
-    ...(typeof row.image_url === "string" ? [row.image_url] : []),
-    ...(Array.isArray(row.images) ? row.images.filter((u): u is string => typeof u === "string") : []),
-    ...(Array.isArray(row.qc_images) ? row.qc_images.filter((u): u is string => typeof u === "string") : []),
+    ...(typeof row['image_url'] === "string" ? [row['image_url']] : []),
+    ...(Array.isArray(row['images']) ? row['images'].filter((u): u is string => typeof u === "string") : []),
+    ...(Array.isArray(row['qc_images']) ? row['qc_images'].filter((u): u is string => typeof u === "string") : []),
   ]));
   const copies = new Map<string, string>();
   for (let i = 0; i < urls.length; i += 3) {
     await Promise.all(urls.slice(i, i + 3).map(async (url) => copies.set(url, await archiveImage(url))));
   }
-  if (typeof row.image_url === "string") patch.image_url = copies.get(row.image_url) ?? row.image_url;
+  if (typeof row['image_url'] === "string") patch['image_url'] = copies.get(row['image_url']) ?? row['image_url'];
   for (const key of ["images", "qc_images"]) {
     if (Array.isArray(row[key])) patch[key] = row[key].map((u) => typeof u === "string" ? copies.get(u) ?? u : u);
   }

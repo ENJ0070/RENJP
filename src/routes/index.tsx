@@ -11,6 +11,8 @@ import {
   type Product,
 } from "@/lib/store";
 import { useLang } from "@/lib/i18n";
+import { HaulCalculator } from "@/components/HaulCalculator";
+import { Button } from "@/components/ui/button";
 
 /** Ile kafelków renderujemy w jednej porcji — reszta doładowuje się na żądanie. */
 const PAGE_SIZE = 24;
@@ -58,7 +60,7 @@ function Index() {
   // Product Finder shows only global (admin) products — seller items live in their stores.
   // Kolejność jest losowa (stała w obrębie sesji), więc nowe produkty trafiają w losowe miejsce.
   const all = useMemo(
-    () => shuffleProducts((products ?? []).filter((p) => !p.seller_id || p.show_on_home)),
+    () => shuffleProducts((products ?? []).filter((p) => !p.seller_id || p.show_on_home)).sort((a, b) => Number(Boolean(b.image_url || b.images?.length)) - Number(Boolean(a.image_url || a.images?.length))),
     [products],
   );
 
@@ -114,23 +116,10 @@ function Index() {
         </div>
       </section>
 
-      <Link
-        to="/outfity"
-        className="group mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/40 bg-surface p-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:glow-ring-strong"
-      >
-        <div className="flex items-center gap-4">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-primary/50 bg-secondary text-2xl transition-transform group-hover:rotate-12">
-            🎲
-          </span>
-          <div>
-            <p className="text-base font-black">{t("home.outfitTitle")}</p>
-            <p className="text-xs text-muted-foreground">{t("home.outfitDesc")}</p>
-          </div>
-        </div>
-        <span className="rounded-lg gradient-brand px-5 py-2.5 text-xs font-extrabold uppercase tracking-wide text-surface-deep transition-transform group-hover:scale-105">
-          {t("home.outfitCta")}
-        </span>
-      </Link>
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-y border-border py-4">
+        <p className="text-sm font-semibold"><span className="text-brand-cyan">−40%</span> {t("cart.shippingTitle")} · {t("cart.code", "kod")} <strong>PKMR</strong></p>
+        <Button asChild size="sm"><Link to="/agenci">{t("promo.claim", "Odbierz")} →</Link></Button>
+      </div>
 
 
 
@@ -240,6 +229,15 @@ function Index() {
         </>
       )}
 
+
+      <section className="mt-12 border-t border-border pt-8"><HaulCalculator /></section>
+      <section className="mt-8 grid gap-4 sm:grid-cols-3">
+        {[
+          { label: t("guide.trackTitle"), icon: "📦", hash: "tracking" },
+          { label: "QC Finder", icon: "🔎", hash: "qc-finder" },
+          { label: t("guide.convTitle"), icon: "🔗", hash: "converter" },
+        ].map((tool) => <Button key={tool.hash} asChild variant="outline" className="h-16 justify-between px-5"><Link to="/poradnik" hash={tool.hash}><span>{tool.icon} {tool.label}</span><span>→</span></Link></Button>)}
+      </section>
 
       {detail ? (
         <ProductModal product={detail} agents={agents ?? []} onClose={() => setDetail(null)} />
