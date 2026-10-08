@@ -1,9 +1,10 @@
 # Roadmap
 
 - [ ] Trwałe kopie zdjęć produktów, galerii i QC; zastępcze zdjęcie po błędzie odczytu
-- [ ] Srebrny suwak wagi zgodny z czarną oprawą
-- [ ] Strona główna: promocja PKMR, kalkulator i narzędzia zamiast odnośnika do outfitów
+- [x] Srebrny suwak wagi zgodny z czarną oprawą
+- [x] Strona główna: promocja PKMR, kalkulator i narzędzia zamiast odnośnika do outfitów
 - [ ] Usuwanie tła AI w panelu zdjęć
+- [ ] Wyraźna pajęczyna podążająca za kursorem; sprawdzenie płynności i zdjęć
 
 - [x] Kosmiczna czarno-szara oprawa całej strony z pajęczyną reagującą na mysz, bez zmiany układu i czcionek
 - [x] Wybór agenta w koszyku otwiera jego stronę rejestracji
